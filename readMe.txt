@@ -8,9 +8,6 @@ Select NomColonne from NomTable
 //Join 
 Select * from NomTable1 join NomTable2 on Nomcolonne1 = NomColonne2
 
-//Delete 
-Delete NomTable
-
 //Union
 Union of NomTable1 and NomTable2
 
@@ -23,8 +20,11 @@ Difference of NomTable1 and NomTable2
 //Creer table 
 Create Nomtable ( NomAtt1,NomAtt2 )
 
-Inserer donner
+//Inserer donner
 Insert Nomtable ( NomAtt1,NomAtt2 )
+
+//Division
+Division NomTable1 par NomTable2 NomTable3 par Nomcolonne2 Nomcolonne3
 
 
 

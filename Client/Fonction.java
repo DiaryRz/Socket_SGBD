@@ -656,7 +656,7 @@ public int LigneDiffFinal(String r1,String r2) throws Exception
         String[] reqUnite = req.split(" ");
         Table GrandTable = new Table();
 //select
-        if(reqUnite[0].equals("Select") && reqUnite[1].equals("*") && reqUnite[2].equals("from"))
+        if(reqUnite[0].equals("Select") && reqUnite[1].equals("*") && reqUnite[2].equals("from") && reqUnite.length==4)
         {
             GrandTable = this.Select(reqUnite[3]);
         }

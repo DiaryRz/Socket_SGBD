@@ -24,7 +24,6 @@ public class Client {
             //flux pour envoyer
             wr = new PrintWriter(clientSocket.getOutputStream());
             //flux pour recevoir
-            in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
             ObjectInputStream in2 = new ObjectInputStream(clientSocket.getInputStream());
             
 

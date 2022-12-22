@@ -15,12 +15,9 @@ public class Server {
              ServerSocket serveurSocket ;
              Socket clientSocket ;
              BufferedReader in;
-             PrintWriter out;
-             Scanner sc=new Scanner(System.in);
         
             serveurSocket = new ServerSocket(5000);
             clientSocket = serveurSocket.accept();
-            out = new PrintWriter(clientSocket.getOutputStream());
             in = new BufferedReader (new InputStreamReader (clientSocket.getInputStream()));
             Fonction appelFonction = new Fonction();
             ObjectOutputStream obj = new ObjectOutputStream(clientSocket.getOutputStream());

@@ -82,26 +82,29 @@ public class Fonction {
         int Ligne = this.nbLigne(Nom);
         Table aretourner = new Table();
         File casa=new File(Nom+".txt");
-        try(BufferedReader lecteur=new BufferedReader(new FileReader(casa)))
+        if(casa.exists())
         {
-            String[] text = new String[Ligne];
-            for(int i = 0 ; i < text.length ; i++)
+            try(BufferedReader lecteur=new BufferedReader(new FileReader(casa)))
             {
-                text[i] = lecteur.readLine();
-            }
-            String NomClass = text[0];
-            String[] NomCol = text[1].split("--");
-            int tailleTab = Ligne-2;
-            String[][] Tableau = new String[tailleTab][NomCol.length];
-            for(int j = 2 ; j < Ligne ; j++)
-            {
-                Tableau[j-2] = text[j].split(",");
-            }
+                String[] text = new String[Ligne];
+                for(int i = 0 ; i < text.length ; i++)
+                {
+                    text[i] = lecteur.readLine();
+                }
+                String NomClass = text[0];
+                String[] NomCol = text[1].split("--");
+                int tailleTab = Ligne-2;
+                String[][] Tableau = new String[tailleTab][NomCol.length];
+                for(int j = 2 ; j < Ligne ; j++)
+                {
+                    Tableau[j-2] = text[j].split(",");
+                }
 
-            aretourner = new Table(NomClass , Tableau , NomCol);
-            
-        }  catch(IOException err){err.printStackTrace();}
-
+                aretourner = new Table(NomClass , Tableau , NomCol);
+                
+            }  catch(IOException err){err.printStackTrace();}
+        }
+        else{throw new Exception("la table n'existe pas");}
         return aretourner;
     }
 //Select 
@@ -364,6 +367,8 @@ public int LigneDiffFinal(String r1,String r2) throws Exception
         Object[][] table1 = t1.getTableau();
         Object[][] table2 = t2.getTableau();
         String[] att = t1.getNomCol();
+        String[] att2 = t2.getNomCol();
+        String[] attMix = new String[att.length+att2.length];
         String Nom = "Cartesienne";
         int ligne = table1.length * table2.length;
         int colonne = table1[0].length + table2[0].length;
@@ -378,17 +383,19 @@ public int LigneDiffFinal(String r1,String r2) throws Exception
                 for(int l = 0 ; l < table1[0].length ; l++)
                 {
                     TableauFinal[i][k] = table1[j][l];
+                    attMix[k] = att[l];
                     k++;
                 }
                 for(int l = 0 ; l < table2[0].length ; l++)
                 {
                     TableauFinal[i][k] = table2[m][l];
+                    attMix[k] = att[l];
                     k++;
                 }
                 i++;
             }
         }
-        GranT = new Table(Nom,TableauFinal,att);
+        GranT = new Table(Nom,TableauFinal,attMix);
         return GranT;
     }
 
@@ -417,13 +424,13 @@ public int LigneDiffFinal(String r1,String r2) throws Exception
     public Table Projection(String r,String Selection) throws Exception
     {
         Table t = this.Recuperation(r);
+        int taille = this.tailleProjection(r,Selection);
         Object[][] tableau = t.getTableau();
         String[] NomAtt = t.getNomCol();
+        String[] NomAttFinal = new String[taille];
         String Nom = "Projection"+t.getNom();
         String[] ListASelectionner = Selection.split(",");
-        int taille = this.tailleProjection(r,Selection);
         Object[][] GrandTable = new Object[tableau.length][taille];
-        String[] NomDistinct = new String[taille];
         Table GranT = new Table();
         for(int m = 0 ; m < tableau.length ; m++)
         {
@@ -435,13 +442,13 @@ public int LigneDiffFinal(String r1,String r2) throws Exception
                     if(NomAtt[i].equals(ListASelectionner[j]))
                     {
                         GrandTable[m][k] = tableau[m][j];
-                        NomDistinct[k] = NomAtt[i];
+                        NomAttFinal[k] = NomAtt[i];
                         k++;
                     }
                 }
             } 
         }
-        GranT = new Table(Nom , GrandTable , NomDistinct);
+        GranT = new Table(Nom , GrandTable , NomAttFinal);
         return GranT;
     }
 //----------------------------------------------Jointure------------------------------------------------------
@@ -495,6 +502,7 @@ public int LigneDiffFinal(String r1,String r2) throws Exception
         Object[][] table2 = t2.getTableau();
         String[] att1 = t1.getNomCol();
         String[] att2 = t2.getNomCol();
+        String[] attTotal = new String[att1.length+att2.length];
         String Nom = "Jointure";
         int j1 = this.indiceJoin(r1, key1);
         int j2 = this.indiceJoin(r2, key2);
@@ -502,7 +510,7 @@ public int LigneDiffFinal(String r1,String r2) throws Exception
         Object[][] GranTable = new Object[table1.length][colone];
         Table Join = new Table();
         boolean verify = this.Doublons(r2, key2);
-        String[] att = new String[colone];
+        String[] att = new String[2];
         if(verify == false)
         {
             for(int i = 0 ; i < table1.length ; i++)
@@ -518,14 +526,14 @@ public int LigneDiffFinal(String r1,String r2) throws Exception
                         {
                             if(h < table1[0].length)
                             {
-                                GranTable[i][h] = table1[i][k];
-                                att[i] =  t1.getNomCol()[i];   
+                                GranTable[i][h] = table1[i][k];   
+                                attTotal[k] = att1[k];
                                 k++;     
                             }
                             else
                             {
                                 GranTable[i][h] = table2[j][l];
-                                att[i] = t2.getNomCol()[j];   
+                                attTotal[h] = att1[l];
                                 l++;
                             }
                         }
@@ -539,7 +547,7 @@ public int LigneDiffFinal(String r1,String r2) throws Exception
                     }
                 }
             }
-            Join = new Table(Nom, GranTable,att);
+            Join = new Table(Nom, GranTable,attTotal);
         }
         else{throw new Exception("duplicate key");}
 
@@ -622,7 +630,7 @@ public int LigneDiffFinal(String r1,String r2) throws Exception
                     }
                 }
                 ecrivain.write("\n");
-                throw new Exception("table creer");
+                throw new Exception("Creation successfull");
             }
         }else{throw new Exception("Cette table existe deja"); }
     }
@@ -648,25 +656,12 @@ public int LigneDiffFinal(String r1,String r2) throws Exception
                     }
                 }
                 ecrivain.write("\n");
-                throw new Exception("Insertion reussi");
             }
+            throw new Exception("Insertion reussi");
         }
         else{
             throw new Exception("Nombre de valeur trop grand");
         }
-    }
-
-//-------------------------------------Delete table------------------------------------------------------------------------
-    public void Delete(String Nom) throws Exception
-    {
-        File casa = new File(Nom+".txt");
-
-        if(casa.exists())
-        {
-            casa.delete();
-            throw new Exception("Table supprimer");
-        }
-        else{throw new Exception("Table innexistante");}
     }
 
 //-----------------------------------------Requette-------------------------------------------------------------------------
@@ -675,7 +670,7 @@ public int LigneDiffFinal(String r1,String r2) throws Exception
         String[] reqUnite = req.split(" ");
         Table GrandTable = new Table();
 //select
-        if(reqUnite[0].equals("Select") && reqUnite[1].equals("*") && reqUnite[2].equals("from") && reqUnite.length == 4)
+        if(reqUnite[0].equals("Select") && reqUnite[1].equals("*") && reqUnite[2].equals("from") && reqUnite.length==4)
         {
             GrandTable = this.Select(reqUnite[3]);
         }
@@ -687,7 +682,7 @@ public int LigneDiffFinal(String r1,String r2) throws Exception
         {
             GrandTable = this.Jointure(reqUnite[3],reqUnite[5],reqUnite[7],reqUnite[9]);
         }
-        else if(reqUnite[0].equals("Select") && reqUnite[2].equals("from") && reqUnite.length == 4)
+        else if(reqUnite[0].equals("Select") && reqUnite[2].equals("from") && reqUnite[1].equals("*")==false && reqUnite.length == 4)
         {
             GrandTable = this.Projection(reqUnite[3],reqUnite[1]);
         }
@@ -717,10 +712,6 @@ public int LigneDiffFinal(String r1,String r2) throws Exception
         else if(reqUnite[0].equals("Insert") && reqUnite.length == 5)
         {
             this.Insert(reqUnite[1],reqUnite[3]);
-        }
-        else if(reqUnite[0].equals("Delete"))
-        {
-            this.Delete(reqUnite[1]);
         }
         else{
             throw  new RequetteException("Erreur") ;
